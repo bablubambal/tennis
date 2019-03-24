@@ -1,0 +1,178 @@
+<html>
+    <head>
+        <title>game_page</title>
+    </head>
+    <body>
+        <canvas id="games" width="800" height="600" > 
+          
+        </canvas>
+        <script>
+            //creating global variable
+            var canvas, canvasContext;
+            var ballx = 10;
+            var speedx = 8;
+            var bally = 10;
+            var speedy = 4;
+            var paddle1y = 250;
+            var paddle2y = 250;
+            const PADDLE_HEIGHT = 100;
+            const PADDLE_THICKNESS = 10;
+            var player1score = 0;
+            var player2score = 0;
+            const WINNING =5;
+            var showingWinScreen = false;
+            function calculateMousePos(evt){
+                var rect = canvas.getBoundingClientRect();
+                var root = document.documentElement;
+                var mouseX = evt.clientX-rect.left-root.scrollLeft;
+                var mouseY = evt.clientY-rect.top-root.scrollTop;
+                return{
+                    x:mouseX,
+                    y:mouseY
+                }
+            }
+            function handleMouse(evt){
+                if(showingWinScreen){
+                    player1score=0;
+                    player2score=0;
+                    showingWinScreen=false;
+                }
+            }
+
+
+        window.onload = function(){
+           //first load all function in the html and then execute
+            canvas = document.getElementById('games');
+            canvasContext = canvas.getContext("2d");
+            var framespersecond = 30;
+            setInterval(function(){ moveEverything();drawEverything();},1000/framespersecond);
+            canvas.addEventListener('mousedown',handleMouse);
+
+
+            canvas.addEventListener('mousemove',function(evt){
+                var mousePos = calculateMousePos(evt);
+                paddle1y = mousePos.y-(PADDLE_HEIGHT/2);
+
+            });   
+        }//rest the ball again to the center
+        function ballReset(){
+            if(player1score>=WINNING || player2score>=WINNING){
+               // player1score=player2score=0;
+                showingWinScreen = true;
+            }
+            speedx = -speedx;
+            ballx = canvas.width/2;
+            bally = canvas.height/2;
+
+        }
+        function computerMovement(){
+            var paddle2yCenter = paddle2y+(PADDLE_HEIGHT/2);
+            if(paddle2yCenter <bally-35){
+                paddle2y = paddle2y+6;
+            } else if( paddle2yCenter> bally-35){
+                paddle2y = paddle2y-6;
+            }
+        }
+        // moving the ball in direction
+        function moveEverything() {
+            if(showingWinScreen==true){
+                return;
+            }
+            computerMovement();
+            ballx = ballx+speedx;
+            // simple idea to create backward flip
+            if(ballx>canvas.width){
+                if(bally > paddle2y&& bally<paddle2y+PADDLE_HEIGHT){
+                speedx = -speedx;
+                var deltaY = bally -(paddle2y+PADDLE_HEIGHT/2);
+                speedy = deltaY *0.32;
+                }
+                else{
+                    player1score++;
+                    ballReset();
+                   
+                }
+               
+            }//revrsing the idea of the speed
+            if(ballx<0){
+                if(bally > paddle2y&& bally<paddle1y+PADDLE_HEIGHT){
+                speedx = -speedx;
+
+                var deltaY = bally -(paddle1y+PADDLE_HEIGHT/2);
+                speedy 
+                speedy = deltaY *0.32;
+                }
+                else{
+                    player2score++;//before set up before ball reset
+                    ballReset();
+                    
+                }
+            }
+            bally = bally+speedy;
+            // simple idea to create backward flip
+            if(bally>canvas.height){
+                speedy = -speedy;
+            }//revrsing the idea of the speed
+            if(bally<0){
+                speedy = -speedy;
+            }
+          
+            
+        }
+        function drawNet(){
+            for( var i=0; i<canvas.height;i+=40){
+                dawRect(canvas.width/2-1,i ,2,20,"white");
+                
+            }
+
+
+        }
+        function drawEverything() {
+           // creating a black background 
+           dawRect(0,0,canvas.width,canvas.height,"black");
+           if(showingWinScreen){
+            canvasContext.fillStyle= "white";
+            if(player1score>=WINNING){
+                canvasContext.fillText("LEFT player won!",350,200);
+
+            }else if(player2score>=WINNING){
+                canvasContext.fillText("RIGHT player won!",350,200);
+
+            }
+            canvasContext.fillText("click to continue",350,560);
+               return;
+           }
+           drawNet();
+           // creatinng a padding 
+            dawRect(0, paddle1y,PADDLE_THICKNESS,PADDLE_HEIGHT,"white");
+            // creatinng a padding 
+            dawRect(canvas.width-PADDLE_THICKNESS, paddle2y,PADDLE_THICKNESS,PADDLE_HEIGHT,"white");
+           // dawRect(ballx,100,10,10,"red");
+           colorCircle(ballx,bally,10,"white");
+           //canvasContext.fillText("score board",100,100);
+           canvasContext.fillText(player1score,100,100);
+           canvasContext.fillText(player2score,canvas.width-100,100);
+           
+           
+
+
+            
+        }//simple function to create the padding
+        function dawRect(widthX,topY,width,height,color){
+            canvasContext.fillStyle= color;
+            canvasContext.fillRect(widthX,topY,width,height,color);
+
+        }
+        //function to create the circle 
+        function colorCircle(centerX,centerY,radius,color){
+            canvasContext.fillStyle=color;
+           canvasContext.beginPath();
+           canvasContext.arc(centerX,centerY,radius,0,Math.PI*2,true);
+           canvasContext.fill();
+
+        }
+           
+             </script>
+       
+    </body>
+</html>
